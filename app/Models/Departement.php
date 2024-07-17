@@ -15,7 +15,7 @@ class Departement extends Model
         'name',
     ];
 
-    public function club()
+    public function Departement()
     {
         return $this->hasMany(Ville::class);
     }

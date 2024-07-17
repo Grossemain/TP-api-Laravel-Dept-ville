@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Ville;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 
 class VilleController extends Controller
 {
@@ -54,19 +55,16 @@ class VilleController extends Controller
 
     public function search(Request $request)
     {
-        // Valider les entrées de la requête
-        $request->validate([
-            'query' => 'required|string|minimum:2'
-        ]);
 
-        // Obtenir le terme de recherche
-        $query = $request->input('query');
+        $departements = Ville::query()
+                 ->when(
+                    $request->search,
+                    function(Builder $builder) use ($request){
+                        $builder->where('name', 'like', "%{$request->search}%");
+                    }
+                 )->get();
 
-        // Rechercher les villes correspondant au terme de recherche
-        $villes = Ville::where('name', 'LIKE', '%' . $query . '%')->get();
-
-        // Retourner les résultats de la recherche
-        return response()->json($villes);
+        return response()->json($departements);
     }
 
     /**

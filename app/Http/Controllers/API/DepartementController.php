@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Departement;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
+
 
 class DepartementController extends Controller
 {
@@ -41,23 +43,38 @@ class DepartementController extends Controller
     {
         return response()->json($departement);
     }
-
     public function search(Request $request)
     {
-        // Valider les entrées de la requête
-        $request->validate([
-            'query' => 'required|string|minimum:2'
-        ]);
 
-        // Obtenir le terme de recherche
-        $query = $request->input('query');
+        $departements = Departement::query()
+                 ->when(
+                    $request->search,
+                    function(Builder $builder) use ($request){
+                        $builder->where('name', 'like', "%{$request->search}%");
+                    }
+                 )->get();
 
-        // Rechercher les departements correspondant au terme de recherche
-        $departements = Departement::where('name', 'LIKE', '%' . $query . '%')->get();
-// dd($departements);
-        // Retourner les résultats de la recherche
         return response()->json($departements);
     }
+    
+    //Seconde methode pour générer une requete mais ne fonctionne pas
+
+    // public function search(Request $request)
+    // {
+    //     // Valider les entrées de la requête
+    //     $request->validate([
+    //         'query' => 'required|string|minimum:2'
+    //     ]);
+
+    //     // Obtenir le terme de recherche
+    //     $query = $request->input('query');
+
+    //     // Rechercher les departements correspondant au terme de recherche
+    //     $departements = Departement::where('name', 'LIKE', '%' . $query . '%')->get();
+
+    //     // Retourner les résultats de la recherche
+    //     return response()->json($departements);
+    // }
 
     /**
      * Update the specified resource in storage.
